@@ -10,13 +10,47 @@ class Tweet {
 	//returns either 'live_event', 'achievement', 'completed_event', or 'miscellaneous'
     get source():string {
         //TODO: identify whether the source is a live event, an achievement, a completed event, or miscellaneous.
-        return "unknown";
+        // const live_event = ['right now'];
+        // const achievement = ['Achieved', 'goal'];
+        // const completed_event = ['Just posted', 'completed', 'Completed'];
+        // const FilterList = [live_event, achievement, completed_event];
+        // for (const event of FilterList){
+        //     const isEvent = event.some( (word) => this.text.includes(word));
+        //     if (isEvent) return event.toString();
+        // }
+        // return 'miscellaneous';
+
+        const FilterList: Record<string,string[]> = {
+            live_event: ['right now'],
+            achievement: ['Achieved', 'goal', 'for a run', 'work on', 'Next stop', 'overall', 'fastest', 'Fastest', 'Can I'],
+            completed_event: ['Just posted', 'completed', 'Completed']
+        } as const; // examine as const operator behavior in Ts 
+
+        for (const [key, value] of Object.entries(FilterList)){
+            const isEvent = value.some( (value) => this.text.includes(value) );
+            if (isEvent) return key;
+        }
+
+        return 'miscellaneous';
+
     }
 
     //returns a boolean, whether the text includes any content written by the person tweeting.
     get written():boolean {
         //TODO: identify whether the tweet is written
-        return false;
+        const FilterWritten: Record<string, string[]> = { written: ['with @Runkeeper'] }
+
+        // Complete Event Check
+        const IsCompletedEvent = this.source === 'completed_event';
+        if (!IsCompletedEvent) return false; 
+
+        // Written Filter Check 
+        for (const [key, value] of Object.entries(FilterWritten)){
+            const isEvent = value.some( (value) => this.text.includes(value) );
+            if (isEvent) return false; 
+        }
+
+        return true;
     }
 
     get writtenText():string {
@@ -24,6 +58,7 @@ class Tweet {
             return "";
         }
         //TODO: parse the written text from the tweet
+        
         return "";
     }
 
