@@ -70,43 +70,16 @@ function parseTweets(runkeeper_tweets) {
 	}
 	
 	// 1.3
-	// Written Testing
-	// for (tweet in tweet_array) { const category = tweet.source; }
-	// function isCompletedEvent(tweet){ return tweet.source === 'completed_event'; }
-	// const OnlyCompletedTweets = tweet_array.filter( (t) => isCompletedEvent(t));
-	// const NoAtRK = filterTweets(OnlyCompletedTweets, 'with @Runkeeper');
-
 	let writtenArray = []; 
 	let writtenCount = 0;
 	for (const tweet of tweet_array) { 
 		if (tweet.written) { 
 			writtenCount++;
-			// const written = tweet.writtenText;
-			// writtenArray.push(written);
-			// const written = tweet.text;
-			// const SplitOnHyphen = written.split("- ")[0];
-			// const SplitOnHttps = SplitOnHyphen.split("https://")[1];
 		}
 	}
 	const writtenPercentage = CreatePercentages(writtenCount, TweetCount);
 	replaceElement('written', writtenCount);
 	replaceElement('writtenPct', writtenPercentage);
-
-	// const str = "The quick brown fox jumps over the lazy dog.";
-
-	// const words = str.split(" ");
-	// console.log(words[3]);
-	// // Expected output: "fox"
-
-	// const chars = str.split("");
-	// console.log(chars[8]);
-	// // Expected output: "k"
-
-	// const strCopy = str.split();
-	// console.log(strCopy);
-	// // Expected output: Array ["The quick brown fox jumps over the lazy dog."]
-
-
 	debugger;
 
 }
