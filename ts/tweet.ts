@@ -48,8 +48,14 @@ class Tweet {
             return "";
         }
         //TODO: parse the written text from the tweet
-        
-        return "";
+        let splits = this.text.split("- ")[1];
+        const httpsTest = /https/;
+        if (httpsTest.test(splits)) { 
+            return splits.split("https")[0];
+        }
+        return splits; 
+
+
     }
 
     get activityType():string {
