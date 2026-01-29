@@ -10,16 +10,6 @@ class Tweet {
 	//returns either 'live_event', 'achievement', 'completed_event', or 'miscellaneous'
     get source():string {
         //TODO: identify whether the source is a live event, an achievement, a completed event, or miscellaneous.
-        // const live_event = ['right now'];
-        // const achievement = ['Achieved', 'goal'];
-        // const completed_event = ['Just posted', 'completed', 'Completed'];
-        // const FilterList = [live_event, achievement, completed_event];
-        // for (const event of FilterList){
-        //     const isEvent = event.some( (word) => this.text.includes(word));
-        //     if (isEvent) return event.toString();
-        // }
-        // return 'miscellaneous';
-
         const FilterList: Record<string,string[]> = {
             live_event: ['right now'],
             achievement: ['Achieved', 'goal', 'for a run', 'work on', 'Next stop', 'overall', 'fastest', 'Fastest', 'Can I'],
@@ -49,7 +39,7 @@ class Tweet {
             const isEvent = value.some( (value) => this.text.includes(value) );
             if (isEvent) return false; 
         }
-
+        
         return true;
     }
 
