@@ -50,8 +50,8 @@ function parseTweets(runkeeper_tweets) {
 	const ExtractMajorityDistance = /(Just)\s(\w+)\s(a)\s(?<distance>\d+\.\d+)(\s?)(?<unit>km|mi)\s(?<activity>\w+)/;
 	const DistanceActivityEdgeCase = /^Completed a (?<distance>\d+\.\d+)\s(?<unit>km|mi)\s(?<activity>\w+)\b/;
 	const TimePattern = /in (\d+:)?(\d+):(\d+)/;
-	const ExtractMajorityTime = /Just\s(\w+)\s(an|a)\s*(?<activity>[\s\S*]*)\sin/;
-
+	const ExtractMajorityTime = /Just\s(\w+\s)?(an|a)\s*(?<activity>.*?)\s+in/;
+	// const ExtractMajorityTime = /Just\s(\w+\s)?(?:an|a)\s*(?<activity>.*?)\s+in/;
 	const OneOffEdgeCaseDistance = /'completed\sa\s(?<distance>\d+.\d+)(\s?)(?<unit>km|mi)\s(?<activity>\w+)/;
 	function tempFilter(tweet){
 		const test = 
@@ -81,7 +81,7 @@ function parseTweets(runkeeper_tweets) {
 		if (DistanceActivity) {return DistanceActivity;}
 
 		// Parsing Majority of Time Activities 
-		DistanceActivity = tweet.text.match(ExtractMajorityDistance);
+		DistanceActivity = tweet.text.match(ExtractMajorityTime);
 		if (DistanceActivity) { return DistanceActivity; }
 
 		// Remaning Tweets
@@ -118,29 +118,73 @@ function parseTweets(runkeeper_tweets) {
 		if (unit === 'km') { distance /= 1.609; }
 		const newTotalDistance = parseFloat(ActivityList[activity].totalDistance) + distance; 
 		ActivityList[activity].totalDistance = newTotalDistance;
-		debugger;
+		
 	}
 	
-	// Extract Top 3
+
+	// Number of Activities
+	const ActivityCount = Object.entries(ActivityList).length;
+	let ElementToReplace = document.getElementById("numberActivities");
+	ElementToReplace.innerText = String(ActivityCount);
 	
+	// Top 3 Activities
+	const top3 = ['firstMost', 'secondMost', 'thirdMost'];
+	const sorted = Object.entries(ActivityList).sort( ([,A],[,B]) => B.count - A.count);
+	const top3Act = {}
+	for (let i=0; i<3; i++){ 
+		// replaceElement(top3[i], sorted[i][0]); 
+		const activity = sorted[i][0];
+		const id = top3[i];
+		let ElementToReplace = document.getElementById(id);
+		ElementToReplace.innerText = activity;
 
-	// Extract Activity inbetween 'a' and 'in DISTANCE/TIME'
-	// [a] [space: 1+] [stuff] [space] [inPattern]
-	// [stuff] = [\s\S*]
-
-	// "Just posted a MySports Freestyle in 1:01:28  - TomTom MySports Watch https://t.co/tv6pKRfYRo #Runkeeper"
-	// "Just completed a 10.39 km run - joggingress https://t.co/alXAbvnMun #Runkeeper"
-
-
-	function extractActivityName(tweet) { 
-
+		// storing element and average distance
+		top3Act[activity] = parseFloat(ActivityList[activity].totalDistance) / parseInt(ActivityList[activity].count);
 	}
-	// const OnlyCompleteEventArray = tweet_array.filter( (tweet) => tweet.isCompletedEvent );
+	
+	// Sort Averages of Top 3 Activities 
+	const sortedAveragesOfTop3 = Object.entries(top3Act).sort(([,a],[,b]) => b-a );
+	const longestAverageDistance = sortedAveragesOfTop3[0][0];
+	const shortestActivityType = sortedAveragesOfTop3[sortedAveragesOfTop3.length-1][0];
+	ElementToReplace = document.getElementById('longestActivityType');
+	ElementToReplace.innerText = longestAverageDistance;
+	ElementToReplace = document.getElementById('shortestActivityType');
+	ElementToReplace.innerText = shortestActivityType;
+	
+	// Weekend or Weekday
+	for (const tweet of tweet_array){ 
+		// COMPLETE
+		if (!tweet.isCompletedEvent){ continue; }
+		const DistanceActivity = ExtractType(tweet);
+		
+	}
 
-	// time + !(number + unit)
-	const DistanceUnitPattern = /\s(\d+).(\d+)(\s)?(km|mi)/;
-	function isTime(tweet){ }
-	function JustPatternExtract(string){ }
+	for (const tweet of tweet_array) {
+		if (!tweet.isCompletedEvent){ continue; }
+		if (ExtractType(tweet) === null) { continue; }
+		if (ExtractType(tweet).groups.activity != longestAverageDistance) { continue; }
+
+		const date = tweet.time.getDay();
+		if (date === 0 || date === 6) { 
+			const currentWeekendCount = parseInt(ActivityList[longestAverageDistance].weekend) + 1;
+			ActivityList[longestAverageDistance].weekend = currentWeekendCount;
+
+		}
+		else {
+			const currentWeekdayCount = parseInt(ActivityList[longestAverageDistance].weekday) + 1;
+			ActivityList[longestAverageDistance].weekday = currentWeekdayCount;
+		}
+	}
+
+	// weekend or weekday
+	const weekendCount = parseInt(ActivityList[longestAverageDistance].weekend);
+	
+	const weekdayCount = parseInt(ActivityList[longestAverageDistance].weekday);
+	const weekType = weekendCount > weekdayCount ? "weekends" : "weekdays"; 
+	ElementToReplace = document.getElementById('weekdayOrWeekendLonger');
+	ElementToReplace.innerText = weekType;
+
+	debugger;
 	//TODO: create a new array or manipulate tweet_array to create a graph of the number of tweets containing each type of activity.
 
 	activity_vis_spec = {
