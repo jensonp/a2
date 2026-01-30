@@ -80,7 +80,7 @@ function parseTweets(runkeeper_tweets) {
 	const writtenPercentage = CreatePercentages(writtenCount, TweetCount);
 	replaceElement('written', writtenCount);
 	replaceElement('writtenPct', writtenPercentage);
-	debugger;
+	// debugger;
 
 }
 

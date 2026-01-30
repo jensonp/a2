@@ -11,8 +11,8 @@ function parseTweets(runkeeper_tweets) {
 
 	2.1
 	// Complete
-	function isComplete(tweet){ return tweet.source === 'completed_event'; }
-	const OnlyComplete = tweet_array.filter( (tweet) => isComplete(tweet) );
+	// function isComplete(tweet){ return tweet.source === 'completed_event'; }
+	// const OnlyComplete = tweet_array.filter( (tweet) => isComplete(tweet) );
 
 	// Time
 	// const TimePattern = /in (\d+:)?(\d+):(\d+)/;
@@ -23,7 +23,6 @@ function parseTweets(runkeeper_tweets) {
 
 	// Extract Activity from CompletedCheck
 	// edgecase for distance based activities
-	const ActivityList = { }
 	// activity: count, total distance, 
 	// activity : distance based ? time based
 	// if activity is distanced based => 
@@ -45,37 +44,33 @@ function parseTweets(runkeeper_tweets) {
 	// 	ActivityList[activity].totalDistance += distance;
 	// 	ActivityList[activity].count++; 
 
-	function matchesPattern(tweet, pattern){ return tweet.text.matches(pattern); }
 
+	// function tempFilter(tweet){
+	// 	const test = 
+	// 		!tweet.text.match(ExtractMajorityDistance)
+	// 		// || tweet.text.match(TimePattern)
+	// 		// || tweet.text.match(DistanceActivityEdgeCase)
+	// 		// || tweet.text.match(ExtractMajorityTime)
+	// 		// || tweet.text.match(OneOffEdgeCaseDistance)
+	// 	;
+	// 	if (!test) { return test; }
+	// 	const extraction = tweet.text.match(ExtractMajorityTime);
+	// 	// debugger; 
+	// 	return test;
+
+	// }
+	// const temp = OnlyComplete.filter( (tweet) => tempFilter(tweet) );
+
+	const ActivityList = { }
 	const ExtractMajorityDistance = /(Just)\s(\w+)\s(a)\s(?<distance>\d+\.\d+)(\s?)(?<unit>km|mi)\s(?<activity>\w+)/;
 	const DistanceActivityEdgeCase = /^Completed a (?<distance>\d+\.\d+)\s(?<unit>km|mi)\s(?<activity>\w+)\b/;
-	const TimePattern = /in (\d+:)?(\d+):(\d+)/;
 	const ExtractMajorityTime = /Just\s(\w+\s)?(an|a)\s*(?<activity>.*?)\s+in/;
-	// const ExtractMajorityTime = /Just\s(\w+\s)?(?:an|a)\s*(?<activity>.*?)\s+in/;
-	const OneOffEdgeCaseDistance = /'completed\sa\s(?<distance>\d+.\d+)(\s?)(?<unit>km|mi)\s(?<activity>\w+)/;
-	function tempFilter(tweet){
-		const test = 
-			!tweet.text.match(ExtractMajorityDistance)
-			// || tweet.text.match(TimePattern)
-			// || tweet.text.match(DistanceActivityEdgeCase)
-			// || tweet.text.match(ExtractMajorityTime)
-			// || tweet.text.match(OneOffEdgeCaseDistance)
-		;
-		if (!test) { return test; }
-		const extraction = tweet.text.match(ExtractMajorityTime);
-		// debugger; 
-		return test;
-
-	}
-	const temp = OnlyComplete.filter( (tweet) => tempFilter(tweet) );
 	// debugger; 
 	function ExtractType(tweet){
 		// Check If Distance 
 		let DistanceActivity = tweet.text.match(ExtractMajorityDistance);
 		if (DistanceActivity) { return DistanceActivity; }
 	
-		// Parsed Majority of Distance Activities => There still exists some distance activies in the TimePattern
-
 		// Check Distance Activity Edge Case
 		DistanceActivity = tweet.text.match(DistanceActivityEdgeCase);
 		if (DistanceActivity) {return DistanceActivity;}
@@ -184,16 +179,44 @@ function parseTweets(runkeeper_tweets) {
 	ElementToReplace = document.getElementById('weekdayOrWeekendLonger');
 	ElementToReplace.innerText = weekType;
 
-	debugger;
+	// debugger;
 	//TODO: create a new array or manipulate tweet_array to create a graph of the number of tweets containing each type of activity.
 
+	
+	let data = Object.entries(ActivityList).map( ([actualActName , LiteralProperties]) => 
+		{
+			return {
+				activities: actualActName,
+				count: LiteralProperties.count
+			}
+		}
+	);
 	activity_vis_spec = {
 	  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
 	  "description": "A graph of the number of Tweets containing each type of activity.",
-	  "data": {
-	    "values": tweet_array
-	  }
-	  //TODO: Add mark and encoding
+	  "data": {"values": data},
+	//   "height": {"step": 250},
+	  "mark": "bar", 
+	  "encoding": {
+		"y": {
+			"field": "activities", 
+			"type": "nominal", 
+			"axis": {
+				"labelAngle": 0,
+				// "labelAlign": "right",
+				// "labelBaseline": "middle"
+				"titleAngle": 0
+			},
+			"sort": "-x"
+		},
+		"x": {
+			"field": "count", 
+			"type": "quantitative", 
+			"axis": {"labelAngle": 0},
+			// "scale": {"type": "log"}
+			}
+		}
+
 	};
 	vegaEmbed('#activityVis', activity_vis_spec, {actions:false});
 

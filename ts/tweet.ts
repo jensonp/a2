@@ -70,25 +70,6 @@ class Tweet {
         }
         
         //TODO: parse the activity type from the text of the tweet
-
-        // Time Check
-        const timePattern = /(\d+:)?(\d+):(\d+)/;
-
-        // const ActivityList: Record<string,string[]> = {
-        //     walk: ['walk with @'],
-        //     run: ['run with @'],
-        //     swim: [''],
-        //     bike: ['Just posted', 'completed', 'Completed'],
-        //     hike: ['Just posted', 'completed', 'Completed'],
-        //     chair_ride: ['pa']
-
-        // } as const; // examine as const operator behavior in Ts 
-
-        // for (const [key, value] of Object.entries(FilterList)){
-        //     const isEvent = value.some( (value) => this.text.includes(value) );
-        //     if (isEvent) return key;
-        // }
-
         return 'miscellaneous';
     }
 
