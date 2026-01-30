@@ -55,15 +55,41 @@ class Tweet {
         }
         return splits; 
 
-
     }
 
+    get isTimeActivity():boolean{
+        
+        return false; 
+    }
+    // Check Completion Event
+    get isCompletedEvent():boolean { return this.source === 'completed_event' ? true: false; }
+    // Helper Function to check if a tweet is categorized as a "completed-event"
     get activityType():string {
         if (this.source != 'completed_event') {
             return "unknown";
         }
+        
         //TODO: parse the activity type from the text of the tweet
-        return "";
+
+        // Time Check
+        const timePattern = /(\d+:)?(\d+):(\d+)/;
+
+        // const ActivityList: Record<string,string[]> = {
+        //     walk: ['walk with @'],
+        //     run: ['run with @'],
+        //     swim: [''],
+        //     bike: ['Just posted', 'completed', 'Completed'],
+        //     hike: ['Just posted', 'completed', 'Completed'],
+        //     chair_ride: ['pa']
+
+        // } as const; // examine as const operator behavior in Ts 
+
+        // for (const [key, value] of Object.entries(FilterList)){
+        //     const isEvent = value.some( (value) => this.text.includes(value) );
+        //     if (isEvent) return key;
+        // }
+
+        return 'miscellaneous';
     }
 
     get distance():number {
