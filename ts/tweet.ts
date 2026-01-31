@@ -1,10 +1,25 @@
+// Groups 
+
 class Tweet {
 	private text:string;
 	time:Date;
+    private activity:string = "";
+    private distanceVar:string = "";
+    private unit:string = "";
 
-	constructor(tweet_text:string, tweet_time:string) {
+
+	constructor(
+        tweet_text:string, 
+        tweet_time:string, 
+        // tweet_activity:string, 
+        // tweet_distanceVar:string, 
+        // tweet_unit:string
+    ) {
         this.text = tweet_text;
 		this.time = new Date(tweet_time);//, "ddd MMM D HH:mm:ss Z YYYY"
+        // this.activity = tweet_activity;
+        // this.distanceVar = tweet_distanceVar;
+        // this.unit = tweet_unit;
 	}
 
 	//returns either 'live_event', 'achievement', 'completed_event', or 'miscellaneous'
@@ -63,14 +78,14 @@ class Tweet {
     }
     // Check Completion Event
     get isCompletedEvent():boolean { return this.source === 'completed_event' ? true: false; }
+
     // Helper Function to check if a tweet is categorized as a "completed-event"
     get activityType():string {
         if (this.source != 'completed_event') {
             return "unknown";
         }
-        
         //TODO: parse the activity type from the text of the tweet
-        return 'miscellaneous';
+        return this.activity;
     }
 
     get distance():number {
@@ -78,9 +93,44 @@ class Tweet {
             return 0;
         }
         //TODO: prase the distance from the text of the tweet
-        return 0;
+        return parseFloat(this.distanceVar);
     }
 
+    // ERROR 
+    get ExtractType(): RegExpMatchArray | null{
+        // debugger; 
+        const ExtractMajorityDistance = /(Just)\s(\w+)\s(a)\s(?<distance>\d+\.\d+)(\s?)(?<unit>km|mi)\s(?<activity>\w+)/;
+        const DistanceActivityEdgeCase = /^Completed a (?<distance>\d+\.\d+)\s(?<unit>km|mi)\s(?<activity>\w+)\b/;
+        const ExtractMajorityTime = /Just\s(\w+\s)?(an|a)\s*(?<activity>.*?)\s+in/;
+        
+        // Check If Distance 
+        let DistanceActivity = this.text.match(ExtractMajorityDistance);
+        if (DistanceActivity) { 
+            this.activity = DistanceActivity.groups?.activity ?? "";
+            this.distanceVar = DistanceActivity.groups?.distance ?? "";
+            this.unit = DistanceActivity.groups?.unit ?? "";
+            return DistanceActivity;
+        }
+    
+        // Check Distance Activity Edge Case
+        DistanceActivity = this.text.match(DistanceActivityEdgeCase);
+        if (DistanceActivity) { 
+            this.activity = DistanceActivity.groups?.activity ?? "";
+            this.distanceVar = DistanceActivity.groups?.distance ?? "";
+            this.unit = DistanceActivity.groups?.unit ?? "";
+            return DistanceActivity;
+        }
+
+        // Parsing Majority of Time Activities 
+        DistanceActivity = this.text.match(ExtractMajorityTime);
+        if (DistanceActivity) { 
+            this.activity = DistanceActivity.groups?.activity ?? "";
+            return DistanceActivity;
+        }
+        return null;
+
+    }
+    
     getHTMLTableRow(rowNumber:number):string {
         //TODO: return a table row which summarizes the tweet with a clickable link to the RunKeeper activity
         return "<tr></tr>";
