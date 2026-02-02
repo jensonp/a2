@@ -10,7 +10,6 @@ function parseTweets(runkeeper_tweets) {
 	});
 
 	2.1
-
 	const ActivityList = { }
 
 	for (const tweet of tweet_array){ 
@@ -105,7 +104,6 @@ function parseTweets(runkeeper_tweets) {
 			ActivityList[longestAverageDistance].weekday = currentWeekdayCount;
 		}
 	}
-	debugger;
 
 	// weekend or weekday
 	const weekendCount = parseInt(ActivityList[longestAverageDistance].weekend);
@@ -160,8 +158,8 @@ function parseTweets(runkeeper_tweets) {
 	// distanceVisAggregated
 
 	let button = document.querySelector("#aggregate");
-	let graph1 = document.querySelector("#distanceVis");
-	let graph2 = document.querySelector("#distanceVisAggregated");
+	let graph2 = document.querySelector("#distanceVis");
+	let graph1 = document.querySelector("#distanceVisAggregated");
 
 	graph1.innerText = 'text1';
 	graph2.innerText = 'text2';
@@ -186,44 +184,117 @@ function parseTweets(runkeeper_tweets) {
 	
 	// Pre-Graph 2: Activity : Day : Distance 
 	// Graph 2
-	const ActivityDayDist = {}
-	
-	function initializeADD(tweet){
-		const activity = tweet.activity;
-		ActivityDayDist[activity] = {
+	function IntToDay(index) { 
+		const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]; 
+		return days[index]; 
+	}
+
+	let ActivityDayList = [];
+	for (const activityLiteral of Object.entries(ActivityList)) { 
+		const activityName = activityLiteral[0];
+		if (!top3ActivityNames.includes(activityName)) { continue; }
+		const dateArray = activityLiteral[1].date;
+		for (let i = 0; i < 7; i++){
+			const dateName = IntToDay(i);
+			const distArray = dateArray[i];
+			for (const distance of distArray) {
+				ActivityDayList.push({
+					activity: activityName, 
+					date: dateName, 
+					distance: distance
+				}); 
+			}
 		}
 	}
-	for(const tweet of tweet_array){
-		if (!tweet.isCompletedEvent){ continue; }
-		const DistanceActivity = tweet.ExtractType;
-		if (DistanceActivity === null){ continue; }
-		const activity = tweet.activity;
-	}
+
 
 	distanceVis = {
 	  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
 	  "description": "A graph showing the distances for the top 3 activities",
-	  "data": {"values": data},
-	  "mark": "bar", 
+	  "data": {"values": ActivityDayList},
+	  "mark": "point",
+	  "width": 500,
 	  "encoding": {
 		"x": {
-			"field": "activities", 
-			"type": "nominal", 
+			"field": "date", 
+			"type": "ordinal", 
+			"sort": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
 			"axis": {
 				"labelAngle": 0,
-				"titleAngle": 0
+				"titleAngle": 0,
+				// "labelOverlap": "stagger",
 			},
 		},
 		"y": {
-			"field": "count", 
+			"field": "distance", 
 			"type": "quantitative", 
-			"axis": {"labelAngle": 0},
+			"axis": {
+				"labelAngle": 0,
+				"title": "Distance (miles)",
+				"titleAngle": 0,
+				"titlePadding": 50
+			},
 			// "scale": {"type": "log"}
-			}
-		}
+			},
+		"color": {
+            "field": "activity",
+            "type": "nominal",
+            "title": "Activity Type",
+			"legend": null
+		},
+	  }
 
 	};
 	vegaEmbed('#distanceVis', distanceVis, {actions:false});
+
+
+	distanceVisAg = {
+	  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+	  "description": "A graph showing the distances for the top 3 activities",
+	  "data": {"values": ActivityDayList},
+	  "transform": [
+		{
+			"aggregate": [{"op": "mean", "field": "distance", "as": "mean_distance"}],
+			"groupby": ["activity", "date"]
+		}
+
+	  ],
+	  "mark": "point",
+	  "width": 500,
+	  "encoding": {
+		"x": {
+			"field": "date", 
+			"type": "ordinal", 
+			"sort": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+			"axis": {
+				"labelAngle": 0,
+				"titleAngle": 0,
+				// "labelOverlap": "stagger",
+			},
+		},
+		"y": {
+			"field": "mean_distance", 
+			"type": "quantitative", 
+			"axis": {
+				"labelAngle": 0,
+				"title": "Mean Distance (miles)",
+				"titleAngle": 0,
+				"titlePadding": 60
+			},
+			// "scale": {"type": "log"}
+			},
+		"color": {
+            "field": "activity",
+            "type": "nominal",
+            "title": "Activity Type",
+			"legend": null
+		},
+	  }
+
+	};
+	vegaEmbed('#distanceVisAggregated', distanceVisAg, {actions:false});
+
+	// debugger
 }
 
 //Wait for the DOM to load

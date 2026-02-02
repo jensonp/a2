@@ -11,15 +11,9 @@ class Tweet {
 	constructor(
         tweet_text:string, 
         tweet_time:string, 
-        // tweet_activity:string, 
-        // tweet_distanceVar:string, 
-        // tweet_unit:string
     ) {
         this.text = tweet_text;
 		this.time = new Date(tweet_time);//, "ddd MMM D HH:mm:ss Z YYYY"
-        // this.activity = tweet_activity;
-        // this.distanceVar = tweet_distanceVar;
-        // this.unit = tweet_unit;
 	}
 
 	//returns either 'live_event', 'achievement', 'completed_event', or 'miscellaneous'
@@ -96,7 +90,6 @@ class Tweet {
         return parseFloat(this.distanceVar);
     }
 
-    // ERROR 
     get ExtractType(): RegExpMatchArray | null{
         // debugger; 
         const ExtractMajorityDistance = /(Just)\s(\w+)\s(a)\s(?<distance>\d+\.\d+)(\s?)(?<unit>km|mi)\s(?<activity>\w+)/;
